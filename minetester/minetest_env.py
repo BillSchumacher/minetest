@@ -146,14 +146,12 @@ class Minetest(gym.Env):
         self.servermods = servermods
         if self.sync_port:
             self.servermods += ["rewards"]  # require the server rewards mod
-            self._enable_servermods()
         else:
             self.clientmods += ["rewards"]  # require the client rewards mod
             # add client mod names in case they entail a server side component
             self.servermods += clientmods
             self._enable_clientmods()
-            self._enable_servermods()
-
+        self._enable_servermods()
         # Write minetest.conf
         self.config_dict = config_dict
         self._write_config()
@@ -340,14 +338,14 @@ class Minetest(gym.Env):
         byte_obs = self.socket.recv()
         obs, _, _, _, _ = unpack_pb_obs(byte_obs)
         self.last_obs = obs
-        logging.debug("Received first obs: {}".format(obs.shape))
+        logging.debug(f"Received first obs: {obs.shape}")
         return obs
 
     def step(self, action: Dict[str, Any]):
         # Send action
         if isinstance(action["MOUSE"], np.ndarray):
             action["MOUSE"] = action["MOUSE"].tolist()
-        logging.debug("Sending action: {}".format(action))
+        logging.debug(f"Sending action: {action}")
         pb_action = pack_pb_action(action)
         self.socket.send(pb_action.SerializeToString())
 

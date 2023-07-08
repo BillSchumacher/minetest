@@ -33,8 +33,8 @@ KEY_MAP = {
 INV_KEY_MAP = {value: key for key, value in KEY_MAP.items()}
 
 # Define noop action
-NOOP_ACTION = {key: 0 for key in KEY_MAP.keys()}
-NOOP_ACTION.update({"MOUSE": np.zeros(2, dtype=int)})
+NOOP_ACTION = {key: 0 for key in KEY_MAP}
+NOOP_ACTION["MOUSE"] = np.zeros(2, dtype=int)
 
 
 def unpack_pb_obs(received_obs: str):
@@ -101,8 +101,7 @@ def start_minetest_server(
         str(server_port),
     ]
     if sync_port:
-        cmd.extend(["--sync-port", str(sync_port)])
-        cmd.extend(["--sync-dtime", str(sync_dtime)])
+        cmd.extend(["--sync-port", str(sync_port), "--sync-dtime", str(sync_dtime)])
     stdout_file = log_path.format("server_stdout")
     stderr_file = log_path.format("server_stderr")
 
@@ -130,13 +129,13 @@ def start_minetest_client(
         "--password",
         "1234",
         "--address",
-        "0.0.0.0",  # listen to all interfaces
+        "0.0.0.0",
         "--port",
         str(server_port),
         "--go",
         "--dumb",
         "--client-address",
-        "tcp://localhost:" + str(client_port),
+        f"tcp://localhost:{client_port}",
         "--record",
         "--noresizing",
         "--config",
@@ -152,10 +151,10 @@ def start_minetest_client(
 
     stdout_file = log_path.format("client_stdout")
     stderr_file = log_path.format("client_stderr")
-    with open(stdout_file, "w") as out, open(stderr_file, "w") as err:
+    with (open(stdout_file, "w") as out, open(stderr_file, "w") as err):
         client_env = os.environ.copy()
         if display is not None:
-            client_env["DISPLAY"] = ":" + str(display)
+            client_env["DISPLAY"] = f":{display}"
         client_process = subprocess.Popen(cmd, stdout=out, stderr=err, env=client_env)
     return client_process
 
@@ -172,5 +171,4 @@ def start_xserver(
         "0",  # screennum param
         f"{display_size[0]}x{display_size[1]}x{display_depth}",
     ]
-    xserver_process = subprocess.Popen(cmd)
-    return xserver_process
+    return subprocess.Popen(cmd)
