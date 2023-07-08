@@ -51,10 +51,11 @@ class DataRecorder:
 
                     if self.debug:
                         _, rew, terminal, _, action = unpack_pb_obs(raw_data)
-                        action_str = ""
-                        for key in action.keys():
-                            if key != "MOUSE" and action[key]:
-                                action_str += key + ", "
+                        action_str = "".join(
+                            f"{key}, "
+                            for key in action.keys()
+                            if key != "MOUSE" and action[key]
+                        )
                         print(f"action={action_str}, rew={rew}, T?={terminal}")
 
                     # Write data to new line
